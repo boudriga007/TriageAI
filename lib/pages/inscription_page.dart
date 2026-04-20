@@ -49,7 +49,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
       setState(() => _erreur = 'Veuillez remplir tous les champs.');
       return;
     }
-
     final ok = AuthService.inscrire(
       nom: _nomController.text.trim(),
       prenom: _prenomController.text.trim(),
@@ -58,7 +57,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
       dateNaissance: _dateNaissance!.toIso8601String().split('T')[0],
       sexe: _sexe,
     );
-
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -82,13 +80,24 @@ class _InscriptionPageState extends State<InscriptionPage> {
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-            // Prénom
+            // ── Logo petit centré ──
+            Center(
+              child: Image.asset(
+                'assets/img/logo.png',
+                width: 100,
+                height: 100,
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Prénom ──
             TextField(
               controller: _prenomController,
               decoration: InputDecoration(
@@ -102,7 +111,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
             const SizedBox(height: 14),
 
-            // Nom
+            // ── Nom ──
             TextField(
               controller: _nomController,
               decoration: InputDecoration(
@@ -116,7 +125,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
             const SizedBox(height: 14),
 
-            // Email
+            // ── Email ──
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -131,7 +140,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
             const SizedBox(height: 14),
 
-            // Mot de passe
+            // ── Mot de passe ──
             TextField(
               controller: _passwordController,
               obscureText: !_motDePasseVisible,
@@ -153,7 +162,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
             const SizedBox(height: 14),
 
-            // Date de naissance
+            // ── Date de naissance ──
             GestureDetector(
               onTap: _choisirDate,
               child: Container(
@@ -189,11 +198,14 @@ class _InscriptionPageState extends State<InscriptionPage> {
             ),
             const SizedBox(height: 14),
 
-            // Sexe
-            const Text('Sexe',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppCouleurs.textePrincipal)),
+            // ── Sexe ──
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Sexe',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppCouleurs.textePrincipal)),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -203,7 +215,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
               ],
             ),
 
-            // Erreur
+            // ── Erreur ──
             if (_erreur != null) ...[
               const SizedBox(height: 12),
               Container(
@@ -220,15 +232,17 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     Expanded(
                       child: Text(_erreur!,
                           style: const TextStyle(
-                              color: AppCouleurs.urgence, fontSize: 13)),
+                              color: AppCouleurs.urgence,
+                              fontSize: 13)),
                     ),
                   ],
                 ),
               ),
             ],
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
 
+            // ── Bouton créer ──
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -245,6 +259,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                         fontSize: 17, fontWeight: FontWeight.bold)),
               ),
             ),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),

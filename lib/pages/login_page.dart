@@ -45,53 +45,50 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppCouleurs.fond,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
 
-              // Logo + titre
+              // ── Logo uniquement ──
               Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: AppCouleurs.primaire,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.medical_services,
-                        color: Colors.white,
-                        size: 44,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'TriageAI',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: AppCouleurs.primaire,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Connectez-vous pour continuer',
-                      style: TextStyle(
-                        color: AppCouleurs.texteSecond,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                child: Image.asset(
+                  'assets/img/logo.png',
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.contain,
                 ),
               ),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
 
-              // Email
+              // ── Titre connexion ──
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Connexion',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppCouleurs.textePrincipal,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Connectez-vous pour accéder à votre espace',
+                  style: TextStyle(
+                    color: AppCouleurs.texteSecond,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── Email ──
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -107,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
 
-              // Mot de passe
+              // ── Mot de passe ──
               TextField(
                 controller: _passwordController,
                 obscureText: !_motDePasseVisible,
@@ -129,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              // Erreur
+              // ── Erreur ──
               if (_erreur != null) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -143,17 +140,20 @@ class _LoginPageState extends State<LoginPage> {
                       const Icon(Icons.error_outline,
                           color: AppCouleurs.urgence, size: 18),
                       const SizedBox(width: 8),
-                      Text(_erreur!,
-                          style: const TextStyle(
-                              color: AppCouleurs.urgence, fontSize: 13)),
+                      Expanded(
+                        child: Text(_erreur!,
+                            style: const TextStyle(
+                                color: AppCouleurs.urgence,
+                                fontSize: 13)),
+                      ),
                     ],
                   ),
                 ),
               ],
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
-              // Bouton connexion
+              // ── Bouton connexion ──
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -176,55 +176,35 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
-              // Lien inscription
-              Center(
-                child: GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const InscriptionPage()),
-                  ),
-                  child: const Text.rich(
-                    TextSpan(
-                      text: 'Pas encore de compte ? ',
-                      style: TextStyle(color: AppCouleurs.texteSecond),
-                      children: [
-                        TextSpan(
-                          text: 'S\'inscrire',
-                          style: TextStyle(
-                            color: AppCouleurs.primaire,
-                            fontWeight: FontWeight.bold,
-                          ),
+              // ── Lien inscription ──
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const InscriptionPage()),
+                ),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'Pas encore de compte ? ',
+                    style: TextStyle(color: AppCouleurs.texteSecond),
+                    children: [
+                      TextSpan(
+                        text: 'S\'inscrire',
+                        style: TextStyle(
+                          color: AppCouleurs.primaire,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+
+              const SizedBox(height: 20),
+
+              // ── Compte test ──
 
               const SizedBox(height: 24),
-
-              // Compte test
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppCouleurs.secondaire.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppCouleurs.secondaire),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline,
-                        color: AppCouleurs.primaire, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Test : test@test.com  /  1234',
-                      style: TextStyle(
-                          color: AppCouleurs.primaire, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
