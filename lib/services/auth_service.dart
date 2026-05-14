@@ -1,29 +1,52 @@
-class AuthService {
-  static final List<Map<String, String>> _utilisateurs = [
-    {
-      'email': 'test@test.com',
-      'motDePasse': '1234',
-      'nom': 'Ben Ali',
-      'prenom': 'Ahmed',
-      'dateNaissance': '1990-05-15',
-      'sexe': 'male',
-    },
-  ];
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-  static String? _emailConnecte;
+class AuthService {
+  static const String _keyUtilisateurs = 'utilisateurs';
+  static const String _keyConnecte     = 'utilisateur_connecte';
+
+  // Charger tous les utilisateurs depuis le stockage
+  static Future<List<Map<String, String>>> _chargerUtilisateurs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data  = prefs.getString(_keyUtilisateurs);
+    if (data == null) {
+      // Compte test par défaut
+      return [
+        {
+          'email': 'test@test.com',
+          'motDePasse': '1234',
+          'nom': 'Ben Ali',
+          'prenom': 'Ahmed',
+          'dateNaissance': '1990-05-15',
+          'sexe': 'male',
+        }
+      ];
+    }
+    final List decoded = jsonDecode(data);
+    return decoded.map((e) => Map<String, String>.from(e)).toList();
+  }
+
+  // Sauvegarder tous les utilisateurs
+  static Future<void> _sauvegarderUtilisateurs(
+      List<Map<String, String>> utilisateurs) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyUtilisateurs, jsonEncode(utilisateurs));
+  }
 
   // Inscription
-  static bool inscrire({
+  static Future<bool> inscrire({
     required String nom,
     required String prenom,
     required String email,
     required String motDePasse,
     required String dateNaissance,
     required String sexe,
-  }) {
-    final dejaExiste = _utilisateurs.any((u) => u['email'] == email);
+  }) async {
+    final utilisateurs = await _chargerUtilisateurs();
+    final dejaExiste = utilisateurs.any((u) => u['email'] == email);
     if (dejaExiste) return false;
-    _utilisateurs.add({
+
+    utilisateurs.add({
       'email': email,
       'motDePasse': motDePasse,
       'nom': nom,
@@ -31,51 +54,75 @@ class AuthService {
       'dateNaissance': dateNaissance,
       'sexe': sexe,
     });
+
+    await _sauvegarderUtilisateurs(utilisateurs);
     return true;
   }
 
   // Connexion
-  static bool connecter({
+  static Future<bool> connecter({
     required String email,
     required String motDePasse,
-  }) {
-    final user = _utilisateurs.firstWhere(
+  }) async {
+    final utilisateurs = await _chargerUtilisateurs();
+    final user = utilisateurs.firstWhere(
       (u) => u['email'] == email && u['motDePasse'] == motDePasse,
       orElse: () => {},
     );
     if (user.isNotEmpty) {
-      _emailConnecte = email;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyConnecte, email);
       return true;
     }
     return false;
   }
 
-  static void deconnecter() => _emailConnecte = null;
+  // Déconnexion
+  static Future<void> deconnecter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyConnecte);
+  }
 
-  static bool get estConnecte => _emailConnecte != null;
-
-  // Récupérer l'utilisateur connecté
-  static Map<String, String> get utilisateurConnecte {
-    if (_emailConnecte == null) return {};
-    return _utilisateurs.firstWhere(
-      (u) => u['email'] == _emailConnecte,
+  // Récupérer utilisateur connecté
+  static Future<Map<String, String>> getUtilisateurConnecte() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString(_keyConnecte);
+    if (email == null) return {};
+    final utilisateurs = await _chargerUtilisateurs();
+    return utilisateurs.firstWhere(
+      (u) => u['email'] == email,
       orElse: () => {},
     );
   }
 
-  // Getters pratiques
-  static String get nomComplet {
-    final u = utilisateurConnecte;
+  static Future<bool> get estConnecte async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyConnecte) != null;
+  }
+
+  static Future<String> get nomComplet async {
+    final u = await getUtilisateurConnecte();
     return '${u['prenom'] ?? ''} ${u['nom'] ?? ''}'.trim();
   }
 
-  static String get prenom => utilisateurConnecte['prenom'] ?? '';
-  static String get sexe   => utilisateurConnecte['sexe'] ?? 'male';
-  static String get email  => _emailConnecte ?? '';
+  static Future<String> get prenom async {
+    final u = await getUtilisateurConnecte();
+    return u['prenom'] ?? '';
+  }
 
-  // Calcul automatique de l'âge depuis la date de naissance
-  static int get age {
-    final dateStr = utilisateurConnecte['dateNaissance'] ?? '';
+  static Future<String> get sexe async {
+    final u = await getUtilisateurConnecte();
+    return u['sexe'] ?? 'male';
+  }
+
+  static Future<String> get email async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyConnecte) ?? '';
+  }
+
+  static Future<int> get age async {
+    final u = await getUtilisateurConnecte();
+    final dateStr = u['dateNaissance'] ?? '';
     if (dateStr.isEmpty) return 25;
     final naissance = DateTime.tryParse(dateStr);
     if (naissance == null) return 25;

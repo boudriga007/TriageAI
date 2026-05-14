@@ -24,11 +24,12 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _connecter() {
-    final ok = AuthService.connecter(
+  void _connecter() async {
+    final ok = await AuthService.connecter(
       email: _emailController.text.trim(),
       motDePasse: _passwordController.text.trim(),
     );
+    if (!mounted) return;
     if (ok) {
       Navigator.pushReplacement(
         context,
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 40),
 
-              // ── Logo uniquement ──
+              // ── Logo ──
               Center(
                 child: Image.asset(
                   'assets/img/logo.png',
@@ -62,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 24),
 
-              // ── Titre connexion ──
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -202,9 +202,10 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
-              // ── Compte test ──
 
-              const SizedBox(height: 24),
+              
+
+         
             ],
           ),
         ),

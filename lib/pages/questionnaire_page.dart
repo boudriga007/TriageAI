@@ -18,21 +18,30 @@ class QuestionnairePage extends StatefulWidget {
 
 class _QuestionnairePageState extends State<QuestionnairePage> {
   late final TriageService _service;
-  final _questions        = QuestionnaireLogic.getQuestions();
-  int _indexCourant       = 0;
+  final _questions    = QuestionnaireLogic.getQuestions();
+  int _indexCourant   = 0;
   String? _reponseSelectionnee;
-  bool _enChargement      = false;
+  bool _enChargement  = false;
+  String _prenomAffiche = '';
 
   @override
   void initState() {
     super.initState();
     _service = TriageService();
-    // On injecte directement les infos du compte connecté
+    _initialiserPatient();
+  }
+
+  Future<void> _initialiserPatient() async {
+    final nom   = await AuthService.nomComplet;
+    final age   = await AuthService.age;
+    final sexe  = await AuthService.sexe;
+    final prenom = await AuthService.prenom;
     _service.setPatient(Patient(
-      nom:   AuthService.nomComplet,
-      age:   AuthService.age,
-      sexe:  AuthService.sexe,
+      nom:  nom,
+      age:  age,
+      sexe: sexe,
     ));
+    setState(() => _prenomAffiche = prenom);
   }
 
   void _suivant() async {
@@ -105,7 +114,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                   color: AppCouleurs.primaire, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Bonjour ${AuthService.prenom}',
+                'Bonjour $_prenomAffiche',
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppCouleurs.texteSecond,

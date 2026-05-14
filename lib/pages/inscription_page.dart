@@ -40,7 +40,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
     if (date != null) setState(() => _dateNaissance = date);
   }
 
-  void _inscrire() {
+  void _inscrire() async {
     if (_nomController.text.isEmpty ||
         _prenomController.text.isEmpty ||
         _emailController.text.isEmpty ||
@@ -49,7 +49,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
       setState(() => _erreur = 'Veuillez remplir tous les champs.');
       return;
     }
-    final ok = AuthService.inscrire(
+    final ok = await AuthService.inscrire(
       nom: _nomController.text.trim(),
       prenom: _prenomController.text.trim(),
       email: _emailController.text.trim(),
@@ -57,6 +57,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
       dateNaissance: _dateNaissance!.toIso8601String().split('T')[0],
       sexe: _sexe,
     );
+    if (!mounted) return;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -85,7 +86,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
           children: [
             const SizedBox(height: 16),
 
-            // ── Logo petit centré ──
+            // ── Logo ──
             Center(
               child: Image.asset(
                 'assets/img/logo.png',

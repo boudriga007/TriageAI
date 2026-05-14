@@ -1,14 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:triage_ai/const/couleurs.dart';
 import 'package:triage_ai/model/triage_result.dart';
+import 'package:triage_ai/services/auth_service.dart';
+import 'package:triage_ai/services/historique_service.dart';
 
-class ResultatPage extends StatelessWidget {
+class ResultatPage extends StatefulWidget {
   final TriageResult resultat;
   const ResultatPage({super.key, required this.resultat});
 
   @override
+  State<ResultatPage> createState() => _ResultatPageState();
+}
+
+class _ResultatPageState extends State<ResultatPage> {
+  @override
+  void initState() {
+    super.initState();
+    _sauvegarderHistorique();
+  }
+
+  Future<void> _sauvegarderHistorique() async {
+    final emailUser = await AuthService.email;
+    await HistoriqueService.sauvegarder(
+      resultat: widget.resultat,
+      email: emailUser,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final estUrgence = resultat.niveau == NiveauUrgence.urgence;
+    final estUrgence = widget.resultat.niveau == NiveauUrgence.urgence;
 
     return Scaffold(
       backgroundColor: AppCouleurs.fond,
@@ -24,7 +45,6 @@ class ResultatPage extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // Icône résultat
             Container(
               width: 100,
               height: 100,
@@ -47,7 +67,6 @@ class ResultatPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Titre
             Text(
               estUrgence ? 'Urgences recommandées' : 'Téléconsultation',
               style: TextStyle(
@@ -62,7 +81,6 @@ class ResultatPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Message
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -81,7 +99,7 @@ class ResultatPage extends StatelessWidget {
                           fontSize: 12)),
                   const SizedBox(height: 8),
                   Text(
-                    resultat.message,
+                    widget.resultat.message,
                     style: const TextStyle(
                       fontSize: 16,
                       color: AppCouleurs.textePrincipal,
@@ -96,7 +114,7 @@ class ResultatPage extends StatelessWidget {
                           fontSize: 12)),
                   const SizedBox(height: 8),
                   Text(
-                    resultat.conseil,
+                    widget.resultat.conseil,
                     style: const TextStyle(
                       fontSize: 15,
                       color: AppCouleurs.textePrincipal,
@@ -109,13 +127,12 @@ class ResultatPage extends StatelessWidget {
 
             const Spacer(),
 
-            // Bouton retour
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: () =>
-                    Navigator.popUntil(context, (route) => route.isFirst),
+                onPressed: () => Navigator.popUntil(
+                    context, (route) => route.isFirst),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppCouleurs.primaire,
                   foregroundColor: Colors.white,

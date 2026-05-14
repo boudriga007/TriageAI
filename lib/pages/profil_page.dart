@@ -3,11 +3,50 @@ import 'package:triage_ai/const/couleurs.dart';
 import 'package:triage_ai/services/auth_service.dart';
 import 'package:triage_ai/pages/login_page.dart';
 
-class ProfilPage extends StatelessWidget {
+class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
 
   @override
+  State<ProfilPage> createState() => _ProfilPageState();
+}
+
+class _ProfilPageState extends State<ProfilPage> {
+  String _nom    = '';
+  String _email  = '';
+  String _sexe   = '';
+  int    _age    = 0;
+  bool   _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _chargerProfil();
+  }
+
+  Future<void> _chargerProfil() async {
+    final nom   = await AuthService.nomComplet;
+    final email = await AuthService.email;
+    final sexe  = await AuthService.sexe;
+    final age   = await AuthService.age;
+    setState(() {
+      _nom    = nom;
+      _email  = email;
+      _sexe   = sexe;
+      _age    = age;
+      _loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: Center(
+            child: CircularProgressIndicator(
+                color: AppCouleurs.primaire)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppCouleurs.fond,
       appBar: AppBar(
@@ -21,14 +60,11 @@ class ProfilPage extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // Avatar
             CircleAvatar(
               radius: 48,
               backgroundColor: AppCouleurs.primaire,
               child: Text(
-                AuthService.prenom.isNotEmpty
-                    ? AuthService.prenom[0].toUpperCase()
-                    : 'P',
+                _nom.isNotEmpty ? _nom[0].toUpperCase() : 'P',
                 style: const TextStyle(
                     fontSize: 36,
                     color: Colors.white,
@@ -38,7 +74,7 @@ class ProfilPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             Text(
-              AuthService.nomComplet,
+              _nom,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -46,32 +82,26 @@ class ProfilPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              AuthService.email,
-              style: const TextStyle(
-                  color: AppCouleurs.texteSecond, fontSize: 14),
-            ),
+            Text(_email,
+                style: const TextStyle(
+                    color: AppCouleurs.texteSecond, fontSize: 14)),
 
             const SizedBox(height: 32),
 
-            // Infos
-            _infoTile(Icons.cake_outlined,
-                'Âge', '${AuthService.age} ans'),
-            _infoTile(Icons.person_outline,
-                'Sexe',
-                AuthService.sexe == 'male' ? 'Homme' : 'Femme'),
-            _infoTile(Icons.email_outlined,
-                'Email', AuthService.email),
+            _infoTile(Icons.cake_outlined, 'Âge', '$_age ans'),
+            _infoTile(Icons.person_outline, 'Sexe',
+                _sexe == 'male' ? 'Homme' : 'Femme'),
+            _infoTile(Icons.email_outlined, 'Email', _email),
 
             const Spacer(),
 
-            // Déconnexion
             SizedBox(
               width: double.infinity,
               height: 52,
               child: OutlinedButton.icon(
-                onPressed: () {
-                  AuthService.deconnecter();
+                onPressed: () async {
+                  await AuthService.deconnecter();
+                  if (!mounted) return;
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
@@ -79,7 +109,8 @@ class ProfilPage extends StatelessWidget {
                     (route) => false,
                   );
                 },
-                icon: const Icon(Icons.logout, color: AppCouleurs.urgence),
+                icon: const Icon(Icons.logout,
+                    color: AppCouleurs.urgence),
                 label: const Text('Se déconnecter',
                     style: TextStyle(
                         color: AppCouleurs.urgence,
