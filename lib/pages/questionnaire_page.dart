@@ -18,10 +18,10 @@ class QuestionnairePage extends StatefulWidget {
 
 class _QuestionnairePageState extends State<QuestionnairePage> {
   late final TriageService _service;
-  final _questions    = QuestionnaireLogic.getQuestions();
-  int _indexCourant   = 0;
+  final _questions      = QuestionnaireLogic.getQuestions();
+  int _indexCourant     = 0;
   String? _reponseSelectionnee;
-  bool _enChargement  = false;
+  bool _enChargement    = false;
   String _prenomAffiche = '';
 
   @override
@@ -32,9 +32,9 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   }
 
   Future<void> _initialiserPatient() async {
-    final nom   = await AuthService.nomComplet;
-    final age   = await AuthService.age;
-    final sexe  = await AuthService.sexe;
+    final nom    = await AuthService.nomComplet;
+    final age    = await AuthService.age;
+    final sexe   = await AuthService.sexe;
     final prenom = await AuthService.prenom;
     _service.setPatient(Patient(
       nom:  nom,
@@ -91,9 +91,11 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         children: [
           CircularProgressIndicator(color: AppCouleurs.primaire),
           SizedBox(height: 20),
-          Text('Analyse en cours...',
-              style: TextStyle(
-                  fontSize: 16, color: AppCouleurs.texteSecond)),
+          Text(
+            'Analyse en cours...',
+            style: TextStyle(
+                fontSize: 16, color: AppCouleurs.texteSecond),
+          ),
         ],
       ),
     );
@@ -103,62 +105,79 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
     final question = _questions[_indexCourant];
     final progress = (_indexCourant + 1) / _questions.length;
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          // Bonjour patient
-          Row(
+    return Column(
+      children: [
+        // ── Header fixe ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          child: Column(
             children: [
-              const Icon(Icons.waving_hand,
-                  color: AppCouleurs.primaire, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Bonjour $_prenomAffiche',
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: AppCouleurs.texteSecond,
-                ),
+              // Bonjour patient
+              Row(
+                children: [
+                  const Icon(Icons.waving_hand,
+                      color: AppCouleurs.primaire, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Bonjour $_prenomAffiche',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppCouleurs.texteSecond,
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
+
+              // Barre de progression
+              LinearProgressIndicator(
+                value: progress,
+                backgroundColor: AppCouleurs.bordure,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppCouleurs.primaire),
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              const SizedBox(height: 24),
+
+              // Carte question
+              QuestionCard(
+                question: question,
+                numeroQuestion: _indexCourant + 1,
+                totalQuestions: _questions.length,
+              ),
+              const SizedBox(height: 16),
             ],
           ),
-          const SizedBox(height: 16),
+        ),
 
-          // Barre de progression
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: AppCouleurs.bordure,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-                AppCouleurs.primaire),
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
+        // ── Réponses scrollables ──
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                ...question.choix.map((choix) => ReponseBtn(
+                      texte: choix,
+                      estSelectionne: _reponseSelectionnee == choix,
+                      onTap: () =>
+                          setState(() => _reponseSelectionnee = choix),
+                    )),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
+        ),
 
-          // Carte question
-          QuestionCard(
-            question: question,
-            numeroQuestion: _indexCourant + 1,
-            totalQuestions: _questions.length,
-          ),
-          const SizedBox(height: 24),
-
-          // Boutons réponses
-          ...question.choix.map((choix) => ReponseBtn(
-                texte: choix,
-                estSelectionne: _reponseSelectionnee == choix,
-                onTap: () =>
-                    setState(() => _reponseSelectionnee = choix),
-              )),
-
-          const Spacer(),
-
-          // Bouton suivant
-          SizedBox(
+        // ── Bouton suivant fixe en bas ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          child: SizedBox(
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: _reponseSelectionnee != null ? _suivant : null,
+              onPressed:
+                  _reponseSelectionnee != null ? _suivant : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppCouleurs.primaire,
                 foregroundColor: Colors.white,
@@ -175,8 +194,8 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
