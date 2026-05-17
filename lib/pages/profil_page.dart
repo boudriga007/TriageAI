@@ -54,7 +54,7 @@ class _ProfilPageState extends State<ProfilPage> {
         backgroundColor: AppCouleurs.primaire,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(          // ← FIX overflow
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -93,7 +93,7 @@ class _ProfilPageState extends State<ProfilPage> {
                 _sexe == 'male' ? 'Homme' : 'Femme'),
             _infoTile(Icons.email_outlined, 'Email', _email),
 
-            const Spacer(),
+            const SizedBox(height: 32),   // ← remplace Spacer()
 
             SizedBox(
               width: double.infinity,

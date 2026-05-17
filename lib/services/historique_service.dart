@@ -1,5 +1,5 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:triage_ai/model/triage_result.dart';
 
 class HistoriqueEntry {
@@ -37,53 +37,63 @@ class HistoriqueEntry {
 }
 
 class HistoriqueService {
-  static const String _key = 'historique_triages';
+  static final FirebaseFirestore _db = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Sauvegarder un triage
+  // Sauvegarder un triage dans Firestore
   static Future<void> sauvegarder({
     required TriageResult resultat,
     required String email,
   }) async {
-    final prefs   = await SharedPreferences.getInstance();
-    final data    = prefs.getString(_key);
-    final List<HistoriqueEntry> liste = data == null
-        ? []
-        : (jsonDecode(data) as List)
-            .map((e) => HistoriqueEntry.fromJson(e))
-            .toList();
+    final user = _auth.currentUser;
+    if (user == null) return;
 
-    liste.insert(
-      0,
-      HistoriqueEntry(
-        date: DateTime.now().toIso8601String(),
-        niveau: resultat.niveau == NiveauUrgence.urgence
-            ? 'urgence'
-            : 'teleconsultation',
-        message: resultat.message,
-        conseil: resultat.conseil,
-        email: email,
-      ),
-    );
-
-    await prefs.setString(
-        _key, jsonEncode(liste.map((e) => e.toJson()).toList()));
+    await _db
+        .collection('utilisateurs')
+        .doc(user.uid)
+        .collection('historique')
+        .add({
+      'date': DateTime.now().toIso8601String(),
+      'timestamp': FieldValue.serverTimestamp(),
+      'niveau': resultat.niveau == NiveauUrgence.urgence
+          ? 'urgence'
+          : 'teleconsultation',
+      'message': resultat.message,
+      'conseil': resultat.conseil,
+      'email': email,
+    });
   }
 
-  // Charger l'historique d'un utilisateur
+  // Charger l'historique de l'utilisateur connecté
   static Future<List<HistoriqueEntry>> charger(String email) async {
-    final prefs = await SharedPreferences.getInstance();
-    final data  = prefs.getString(_key);
-    if (data == null) return [];
-    final List decoded = jsonDecode(data);
-    return decoded
-        .map((e) => HistoriqueEntry.fromJson(e))
-        .where((e) => e.email == email)
+    final user = _auth.currentUser;
+    if (user == null) return [];
+
+    final snapshot = await _db
+        .collection('utilisateurs')
+        .doc(user.uid)
+        .collection('historique')
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => HistoriqueEntry.fromJson(doc.data()))
         .toList();
   }
 
   // Vider l'historique
   static Future<void> vider() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final snapshot = await _db
+        .collection('utilisateurs')
+        .doc(user.uid)
+        .collection('historique')
+        .get();
+
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 }

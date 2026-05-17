@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "555736858076",
+    "project_id": "triageia-18fd9",
+    "storage_bucket": "triageia-18fd9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:555736858076:android:abe81862818bb55a402319",
+        "android_client_info": {
+          "package_name": "com.example.triage_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxuWAoKo_IaTQaeT90ZNwb3XW2AR95NjE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:555736858076:android:bce0839be61488b9402319",
+        "android_client_info": {
+          "package_name": "com.polytec"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxuWAoKo_IaTQaeT90ZNwb3XW2AR95NjE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
